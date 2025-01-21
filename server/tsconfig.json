@@ -8,7 +8,7 @@
     "resolveJsonModule": true,
     "moduleDetection": "force",
     "isolatedModules": false,
-
+    "moduleResolution": "nodenext",
     /* Strictness */
     "strict": true,
     "noImplicitOverride": true,
