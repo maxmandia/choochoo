@@ -8,6 +8,7 @@ import { Button } from "./components/primitives/button";
 import { useState } from "react";
 import { cn } from "./lib/utils";
 import DeploymentCardContainer from "./components/deployment-card-container";
+import { Separator } from "./components/primitives/separator";
 
 function App() {
   const [showHistory, setShowHistory] = useState(true);
@@ -31,8 +32,8 @@ function App() {
   }
 
   return (
-    <div className="bg-backdrop h-screen w-screen flex items-center justify-center font-sans">
-      <div className="flex flex-col items-start justify-start bg-white w-[50%] h-[90%] p-8 border-solid border-[1px] border-backdropBorder  shadow-lg">
+    <div className="bg-backdrop w-screen min-h-screen flex font-sans">
+      <div className="flex flex-col items-start justify-start bg-white w-[50%] mx-auto p-8 my-10 border-solid border-[1px] border-backdropBorder  shadow-lg">
         <div className="flex items-center gap-2">
           <img
             className="w-[30px] object-contain rounded-full"
@@ -41,7 +42,7 @@ function App() {
           />
           <h1 className="text-[22px] font-semibold">{data?.service.name}</h1>
         </div>
-
+        <Separator className="my-4" />
         <DeploymentCardContainer>
           {deployments?.activeDeployment && (
             <DeploymentCard
@@ -66,11 +67,11 @@ function App() {
         </Button>
         <DeploymentCardContainer
           className={cn(
-            "grid transition-[grid-template-rows] duration-300",
+            "grid transition-[grid-template-rows] duration-300 flex-grow",
             showHistory ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
           )}
         >
-          <div className="overflow-hidden flex flex-col gap-2">
+          <div className="overflow-y-auto flex-grow flex flex-col gap-2">
             {deployments?.priorDeployments.map((deployment) => (
               <DeploymentCard key={deployment.id} deployment={deployment} />
             ))}

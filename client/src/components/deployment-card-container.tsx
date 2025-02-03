@@ -9,7 +9,7 @@ function DeploymentCardContainer({
   className?: string;
 }) {
   return (
-    <div className={cn("flex flex-col gap-2 w-full py-4", className)}>
+    <div className={cn("flex flex-col gap-4 w-full py-4", className)}>
       {children}
     </div>
   );
