@@ -29,7 +29,10 @@ export function useGetDeployments(
 
       if (data?.deployments?.edges) {
         for (const deployment of data.deployments.edges) {
-          if (deployment.node.status === DeploymentStatus.SUCCESS) {
+          if (
+            deployment.node.status === DeploymentStatus.SUCCESS ||
+            deployment.node.status === DeploymentStatus.CRASHED
+          ) {
             activeDeployment = deployment.node;
           } else {
             priorDeployments.push(deployment.node);

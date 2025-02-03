@@ -1,7 +1,5 @@
 import { useGetService } from "./hooks/useGetService";
 import { useGetDeployments } from "./hooks/useGetDeployments";
-import { useServiceDeploy } from "./hooks/useServiceDeploy";
-import { useStopDeployment } from "./hooks/useStopDeployement";
 import DeploymentCard from "./components/deployment-card";
 import { LucideArrowDown } from "lucide-react";
 import { Button } from "./components/primitives/button";
@@ -12,24 +10,13 @@ import { Separator } from "./components/primitives/separator";
 
 function App() {
   const [showHistory, setShowHistory] = useState(true);
-  const { data, refetch } = useGetService(
-    "39cd327c-525b-414e-957c-3959a17486a2"
-  );
-  const { mutateAsync: deployService } = useServiceDeploy(
-    "96fbbfd7-6939-4fc5-9022-954774f26bd9",
-    "39cd327c-525b-414e-957c-3959a17486a2"
-  );
-  const { mutate: stopDeployment } = useStopDeployment();
+  const { data } = useGetService("39cd327c-525b-414e-957c-3959a17486a2");
+
   const { data: deployments } = useGetDeployments(
     "39cd327c-525b-414e-957c-3959a17486a2",
     "5601a4f4-da8e-4978-9e2f-ac476d3cb851",
     "96fbbfd7-6939-4fc5-9022-954774f26bd9"
   );
-
-  async function deployHandler() {
-    await deployService();
-    refetch();
-  }
 
   return (
     <div className="bg-backdrop w-screen min-h-screen flex font-sans">
