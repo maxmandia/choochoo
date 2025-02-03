@@ -5,6 +5,14 @@ import { graphqlRequest } from "../api/graphqlClient";
 interface ServiceData {
   service: {
     createdAt: string;
+    deployments: {
+      edges: {
+        node: {
+          id: string;
+          createdAt: string;
+        };
+      }[];
+    };
   };
 }
 
