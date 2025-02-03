@@ -64,18 +64,16 @@ function App() {
           />
           <span>History</span>
         </Button>
-        <DeploymentCardContainer>
-          <div
-            className={cn(
-              "grid transition-[grid-template-rows] duration-300",
-              showHistory ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-            )}
-          >
-            <div className="overflow-hidden">
-              {deployments?.priorDeployments.map((deployment) => (
-                <DeploymentCard key={deployment.id} deployment={deployment} />
-              ))}
-            </div>
+        <DeploymentCardContainer
+          className={cn(
+            "grid transition-[grid-template-rows] duration-300",
+            showHistory ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+          )}
+        >
+          <div className="overflow-hidden flex flex-col gap-2">
+            {deployments?.priorDeployments.map((deployment) => (
+              <DeploymentCard key={deployment.id} deployment={deployment} />
+            ))}
           </div>
         </DeploymentCardContainer>
       </div>
