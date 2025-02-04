@@ -9,3 +9,11 @@ export const STOP_DEPLOYMENT = `
     deploymentStop(id: $id)
   }
 `;
+
+export const REDEPLOY_DEPLOYMENT = `
+  mutation deploymentRedeploy($id: String!) {
+    deploymentRedeploy(id: $id) {
+      id
+    }
+  }
+`;
