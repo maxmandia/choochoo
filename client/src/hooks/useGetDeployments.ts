@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { GET_DEPLOYMENTS } from "../api/queries";
 import { graphqlRequest } from "../api/graphqlClient";
 import { Deployment, DeploymentStatus, ServiceData } from "@/types";
@@ -11,9 +11,10 @@ export function useGetDeployments(
 ) {
   const queryClient = useQueryClient();
 
-  return useQuery({
+  return useInfiniteQuery<any, Error, any, string[], string | null>({
     queryKey: ["deployments"],
-    queryFn: async () => {
+    initialPageParam: null,
+    queryFn: async ({ pageParam = null }) => {
       const data = await graphqlRequest<ServiceData>({
         query: GET_DEPLOYMENTS,
         variables: {
@@ -23,6 +24,7 @@ export function useGetDeployments(
             environmentId,
           },
           first: pageSize,
+          after: pageParam,
         },
       });
 
@@ -63,8 +65,18 @@ export function useGetDeployments(
         }
       }, 1000);
 
-      return { activeDeployments, priorDeployments };
+      return {
+        activeDeployments,
+        priorDeployments,
+        pageInfo: data?.deployments?.pageInfo,
+      };
     },
-    select: (data) => data ?? { activeDeployments: [], priorDeployments: [] },
+    getNextPageParam: (lastPage) => lastPage.pageInfo?.endCursor,
+    select: (data) => ({
+      pages: data.pages,
+      pageParams: data.pageParams,
+      activeDeployments: data.pages[0].activeDeployments,
+      priorDeployments: data.pages.flatMap((page) => page.priorDeployments),
+    }),
   });
 }

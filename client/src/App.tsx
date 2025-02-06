@@ -3,19 +3,52 @@ import { useGetDeployments } from "./hooks/useGetDeployments";
 import DeploymentCard from "./components/deployment-card";
 import { LucideArrowDown } from "lucide-react";
 import { Button } from "./components/primitives/button";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "./lib/utils";
 import DeploymentCardContainer from "./components/deployment-card-container";
 import { Separator } from "./components/primitives/separator";
+import { Deployment } from "@/types";
 
 function App() {
   const [showHistory, setShowHistory] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const { data } = useGetService("39cd327c-525b-414e-957c-3959a17486a2");
-  const { data: deployments } = useGetDeployments(
+  const {
+    data: deployments,
+    fetchNextPage,
+    hasNextPage,
+  } = useGetDeployments(
     "39cd327c-525b-414e-957c-3959a17486a2",
     "5601a4f4-da8e-4978-9e2f-ac476d3cb851",
     "96fbbfd7-6939-4fc5-9022-954774f26bd9"
   );
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      async (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isLoadingMore) {
+          try {
+            setIsLoadingMore(true);
+            await fetchNextPage();
+          } finally {
+            setIsLoadingMore(false);
+          }
+        }
+      },
+      { threshold: 0 }
+    );
+
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer && showHistory) {
+      const lastChild = scrollContainer.lastElementChild;
+      if (lastChild) {
+        observer.observe(lastChild);
+      }
+    }
+
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, showHistory, isLoadingMore]);
 
   return (
     <div className="bg-gray-100 w-screen min-h-screen flex font-sans">
@@ -33,13 +66,15 @@ function App() {
           {deployments?.activeDeployments.length &&
             deployments.activeDeployments.length > 0 && (
               <>
-                {deployments.activeDeployments.map((deployment, index) => (
-                  <DeploymentCard
-                    key={deployment.id}
-                    deployment={deployment}
-                    isMostRecent={index === 0}
-                  />
-                ))}
+                {deployments.activeDeployments.map(
+                  (deployment: Deployment, index: number) => (
+                    <DeploymentCard
+                      key={deployment.id}
+                      deployment={deployment}
+                      isMostRecent={index === 0}
+                    />
+                  )
+                )}
               </>
             )}
         </DeploymentCardContainer>
@@ -59,12 +94,15 @@ function App() {
         </Button>
         <DeploymentCardContainer
           className={cn(
-            "grid transition-[grid-template-rows] duration-300 flex-grow",
+            "grid transition-[grid-template-rows] duration-300 flex-grow max-h-[500px]",
             showHistory ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
           )}
         >
-          <div className="overflow-y-auto flex-grow flex flex-col gap-2">
-            {deployments?.priorDeployments.map((deployment) => (
+          <div
+            ref={scrollContainerRef}
+            className="overflow-y-scroll flex flex-col gap-2 h-full min-h-0"
+          >
+            {deployments?.priorDeployments.map((deployment: Deployment) => (
               <DeploymentCard key={deployment.id} deployment={deployment} />
             ))}
           </div>
