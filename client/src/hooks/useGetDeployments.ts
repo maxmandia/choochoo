@@ -24,24 +24,26 @@ export function useGetDeployments(
         },
       });
 
-      let activeDeployment = null;
+      let activeDeployments: Deployment[] = [];
       let priorDeployments: Deployment[] = [];
 
       if (data?.deployments?.edges) {
         for (const deployment of data.deployments.edges) {
           if (
             deployment.node.status === DeploymentStatus.SUCCESS ||
-            deployment.node.status === DeploymentStatus.CRASHED
+            deployment.node.status === DeploymentStatus.CRASHED ||
+            deployment.node.status === DeploymentStatus.BUILDING ||
+            deployment.node.status === DeploymentStatus.DEPLOYING
           ) {
-            activeDeployment = deployment.node;
+            activeDeployments.push(deployment.node);
           } else {
             priorDeployments.push(deployment.node);
           }
         }
       }
 
-      return { activeDeployment, priorDeployments };
+      return { activeDeployments, priorDeployments };
     },
-    select: (data) => data ?? { activeDeployment: null, priorDeployments: [] },
+    select: (data) => data ?? { activeDeployments: [], priorDeployments: [] },
   });
 }

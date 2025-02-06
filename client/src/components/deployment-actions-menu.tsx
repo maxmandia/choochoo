@@ -1,5 +1,4 @@
 import { DeploymentStatus } from "@/types";
-import React from "react";
 import { Deployment } from "@/types";
 import { DropdownMenuTrigger } from "./primitives/dropdown-menu";
 import {
@@ -15,21 +14,28 @@ import { cn } from "@/lib/utils";
 import { useServiceDeploy } from "@/hooks/useServiceDeploy";
 import { useStopDeployment } from "@/hooks/useStopDeployement";
 import { useDeploymentRedeploy } from "@/hooks/useDeploymentRedeploy";
+import { useWebSocket } from "@/context/web-socket-context";
 function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
+  const { unsubscribeFromDeployment, subscribeToDeployment } = useWebSocket();
   const { mutate: stopDeployment } = useStopDeployment();
   const { mutate: deployService } = useServiceDeploy(
     "96fbbfd7-6939-4fc5-9022-954774f26bd9",
     "39cd327c-525b-414e-957c-3959a17486a2"
   );
-  const { mutate: redeployDeployment } = useDeploymentRedeploy();
+  const { mutateAsync: redeployDeployment } = useDeploymentRedeploy();
 
-  function actionHandler(action: string) {
+  async function actionHandler(action: string) {
     switch (action) {
       case "stop":
         stopDeployment(deployment.id);
         break;
       case "redeploy":
-        redeployDeployment(deployment.id);
+        unsubscribeFromDeployment();
+        const {
+          deploymentRedeploy: { id },
+        } = await redeployDeployment(deployment.id);
+        // subscribe to the redeployed deployment
+        subscribeToDeployment(id);
         break;
       case "deploy":
         deployService();
