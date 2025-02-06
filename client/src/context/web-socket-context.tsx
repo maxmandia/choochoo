@@ -45,9 +45,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
       );
 
       // invalidate deployments query to refetch the latest data on every new event that comes in
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["deployments"] });
-      }, 1000);
+      queryClient.invalidateQueries({ queryKey: ["deployments"] });
     };
 
     wsInstance.onopen = () => {

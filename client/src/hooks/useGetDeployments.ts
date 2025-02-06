@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { GET_DEPLOYMENTS } from "../api/queries";
 import { graphqlRequest } from "../api/graphqlClient";
 import { Deployment, DeploymentStatus, ServiceData } from "@/types";
@@ -9,6 +9,8 @@ export function useGetDeployments(
   environmentId: string,
   pageSize: number = 10
 ) {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: ["deployments", serviceId, projectId, environmentId, pageSize],
     queryFn: async () => {
@@ -41,6 +43,24 @@ export function useGetDeployments(
           }
         }
       }
+
+      // when we recieve a new deployment event, we refetch deployments inside the web socket context.
+      // however, deployement statuses can change after the last deployment event is recieved
+      // so we need to refetch the deployments again here if either of the following are true:
+      // 1. there is a deployment that is being removed
+      // 2. there are more than 1 deployment that has a status of success
+      setTimeout(() => {
+        if (
+          priorDeployments.some(
+            (deployment) => deployment.status === DeploymentStatus.REMOVING
+          ) ||
+          activeDeployments.filter(
+            (deployment) => deployment.status === DeploymentStatus.SUCCESS
+          ).length > 1
+        ) {
+          queryClient.invalidateQueries({ queryKey: ["deployments"] });
+        }
+      }, 1000);
 
       return { activeDeployments, priorDeployments };
     },
