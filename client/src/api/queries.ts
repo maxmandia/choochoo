@@ -67,3 +67,15 @@ export const GET_DEPLOYMENTS = `
     }
   }
 `;
+
+export const GET_DEPLOYMENT_EVENTS = `
+  query deploymentEvents($id: String!) {
+    deploymentEvents(id: $id) {
+      edges {
+        node {
+          step
+        }
+      }
+    }
+  }
+`;

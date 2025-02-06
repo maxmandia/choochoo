@@ -23,6 +23,5 @@ export async function graphqlRequest<T>({
   if (data.errors) {
     throw new Error(data.errors[0].message);
   }
-
   return data.data as T;
 }

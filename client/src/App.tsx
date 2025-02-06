@@ -11,7 +11,6 @@ import { Separator } from "./components/primitives/separator";
 function App() {
   const [showHistory, setShowHistory] = useState(true);
   const { data } = useGetService("39cd327c-525b-414e-957c-3959a17486a2");
-
   const { data: deployments } = useGetDeployments(
     "39cd327c-525b-414e-957c-3959a17486a2",
     "5601a4f4-da8e-4978-9e2f-ac476d3cb851",
@@ -31,12 +30,18 @@ function App() {
         </div>
         <Separator className="my-4" />
         <DeploymentCardContainer>
-          {deployments?.activeDeployment && (
-            <DeploymentCard
-              key={deployments?.activeDeployment.id}
-              deployment={deployments?.activeDeployment}
-            />
-          )}
+          {deployments?.activeDeployments.length &&
+            deployments.activeDeployments.length > 0 && (
+              <>
+                {deployments.activeDeployments.map((deployment, index) => (
+                  <DeploymentCard
+                    key={deployment.id}
+                    deployment={deployment}
+                    isMostRecent={index === 0}
+                  />
+                ))}
+              </>
+            )}
         </DeploymentCardContainer>
 
         <Button

@@ -2,6 +2,9 @@ export enum DeploymentStatus {
   SUCCESS = "SUCCESS",
   REMOVED = "REMOVED",
   CRASHED = "CRASHED",
+  BUILDING = "BUILDING",
+  DEPLOYING = "DEPLOYING",
+  REMOVING = "REMOVING",
 }
 
 export interface Deployment {
