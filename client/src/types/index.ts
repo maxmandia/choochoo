@@ -59,3 +59,7 @@ export interface ServiceData {
     };
   };
 }
+
+export interface ServiceInstanceDeployData {
+  serviceInstanceDeployV2: string;
+}

@@ -15,10 +15,13 @@ import { useServiceDeploy } from "@/hooks/useServiceDeploy";
 import { useStopDeployment } from "@/hooks/useStopDeployement";
 import { useDeploymentRedeploy } from "@/hooks/useDeploymentRedeploy";
 import { useWebSocket } from "@/context/web-socket-context";
+import { useQueryClient } from "@tanstack/react-query";
+
 function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
+  const queryClient = useQueryClient();
   const { unsubscribeFromDeployment, subscribeToDeployment } = useWebSocket();
-  const { mutate: stopDeployment } = useStopDeployment();
-  const { mutate: deployService } = useServiceDeploy(
+  const { mutateAsync: stopDeployment } = useStopDeployment();
+  const { mutateAsync: deployService } = useServiceDeploy(
     "96fbbfd7-6939-4fc5-9022-954774f26bd9",
     "39cd327c-525b-414e-957c-3959a17486a2"
   );
@@ -27,7 +30,12 @@ function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
   async function actionHandler(action: string) {
     switch (action) {
       case "stop":
-        stopDeployment(deployment.id);
+        await stopDeployment(deployment.id);
+        // invalidate the deployments query after 5 seconds to fetch crashed status
+        // this is a hack to get the deployment status to update (ideally we would use a websocket)
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ["deployments"] });
+        }, 5000);
         break;
       case "redeploy":
         unsubscribeFromDeployment();
@@ -38,7 +46,9 @@ function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
         subscribeToDeployment(id);
         break;
       case "deploy":
-        deployService();
+        const deployedId = await deployService();
+        // subscribe to the recently deployed deployment
+        subscribeToDeployment(deployedId);
         break;
     }
   }

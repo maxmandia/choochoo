@@ -12,7 +12,7 @@ export function useGetDeployments(
   const queryClient = useQueryClient();
 
   return useQuery({
-    queryKey: ["deployments", serviceId, projectId, environmentId, pageSize],
+    queryKey: ["deployments"],
     queryFn: async () => {
       const data = await graphqlRequest<ServiceData>({
         query: GET_DEPLOYMENTS,

@@ -79,8 +79,10 @@ function DeploymentCard({
           </div>
           <DeploymentActionsMenu deployment={deployment} />
         </Card>
-        {/* Only show deployment events for the most recent deployment */}
-        {isMostRecent && <DeploymentEvents deployment={deployment} />}
+        {/* Only show deployment events for the most recent deployment (except crashed deployments) */}
+        {isMostRecent && deployment.status !== DeploymentStatus.CRASHED && (
+          <DeploymentEvents deployment={deployment} />
+        )}
       </div>
     </>
   );
