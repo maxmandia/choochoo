@@ -25,13 +25,13 @@ function DeploymentEvents({ deployment }: { deployment: Deployment }) {
   return (
     <Card
       className={
-        "flex rounded-none items-center p-4 pl-14 gap-2 justify-start m-1 shadow-none border-none bg-[#F4FAF8]"
+        "flex rounded-none items-center p-4 pl-14 gap-2 justify-start m-1 shadow-none border-none bg-green-50"
       }
     >
-      <span className="text-[12px] text-[hsl(152_38%_42%)]">
+      <span className="text-[12px] text-green-500">
         Deployement in progress:
       </span>
-      <span className="text-[12px] text-[hsl(152_38%_42%)]">
+      <span className="text-[12px] text-green-500">
         {deploymentEvents?.[deploymentEvents.length - 1].step}
       </span>
     </Card>

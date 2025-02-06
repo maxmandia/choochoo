@@ -18,8 +18,8 @@ function App() {
   );
 
   return (
-    <div className="bg-backdrop w-screen min-h-screen flex font-sans">
-      <div className="flex flex-col items-start justify-start bg-white w-[50%] mx-auto p-8 my-10 border-solid border-[1px] border-backdropBorder  shadow-lg">
+    <div className="bg-gray-100 w-screen min-h-screen flex font-sans">
+      <div className="flex flex-col items-start justify-start bg-white w-[50%] mx-auto p-8 my-10 border-solid border-[1px] border-gray-300 shadow-lg">
         <div className="flex items-center gap-2">
           <img
             className="w-[30px] object-contain rounded-full"

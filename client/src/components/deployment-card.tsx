@@ -19,19 +19,18 @@ function DeploymentCard({
         className={cn(
           "border-solid border-[1px] border-backdropBorder w-full",
           deployment.status === DeploymentStatus.SUCCESS &&
-            "border-[hsl(152_38%_80%)] border-solid border-[1px]",
+            "border-green-200 border-solid border-[1px]",
           deployment.status === DeploymentStatus.REMOVED && "border-gray-100",
           deployment.status === DeploymentStatus.CRASHED &&
-            "border-[hsl(1_62%_44%)] border-solid border-[1px]"
+            "border-red-500 border-solid border-[1px]"
         )}
       >
         <Card
           className={cn(
             "flex rounded-none items-center p-4 gap-6 justify-between m-1 shadow-none border-none",
-            deployment.status === DeploymentStatus.SUCCESS && "bg-[#F4FAF8]",
+            deployment.status === DeploymentStatus.SUCCESS && "bg-green-50",
             deployment.status === DeploymentStatus.REMOVED && "bg-gray-100",
-            deployment.status === DeploymentStatus.CRASHED &&
-              "bg-[hsl(1_55%_98%)] "
+            deployment.status === DeploymentStatus.CRASHED && "bg-red-50"
           )}
         >
           <div className="flex items-center gap-4">
@@ -39,11 +38,11 @@ function DeploymentCard({
               className={cn(
                 "rounded-sm font-normal",
                 deployment.status === DeploymentStatus.SUCCESS &&
-                  "bg-[hsl(152_38%_91%)] text-[hsl(152_38%_42%)] hover:bg-[hsl(153,37%,81%)]",
+                  "bg-green-100 text-green-500 hover:bg-green-200",
                 deployment.status === DeploymentStatus.REMOVED &&
                   "bg-gray-200 text-gray-500 hover:bg-gray-300",
                 deployment.status === DeploymentStatus.CRASHED &&
-                  "text-[hsl(1_62%_44%)] bg-[hsl(1_68%_95%)]"
+                  "text-red-500 bg-red-100"
               )}
             >
               {deployment.status}

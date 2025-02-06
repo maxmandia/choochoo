@@ -62,9 +62,9 @@ function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
               className={cn(
                 "px-3 py-1",
                 deployment.status === DeploymentStatus.SUCCESS &&
-                  "bg-transparent border-[hsl(152_38%_80%)] text-[hsl(152_38%_42%)] hover:bg-[hsl(152_38%_91%)] hover:text-[hsl(152_38%_42%)]",
+                  "bg-transparent border-green-200 text-green-500 hover:bg-green-100 hover:text-green-500",
                 deployment.status === DeploymentStatus.CRASHED &&
-                  "bg-transparent border-[hsl(1_62%_44%)] text-[hsl(1_62%_44%)] hover:text-[hsl(1_62%_44%)] hover:bg-[hsl(1_68%_95%)]"
+                  "bg-transparent border-red-500 text-red-500 hover:text-red-500 hover:bg-red-100"
               )}
             >
               <EllipsisVerticalIcon />
