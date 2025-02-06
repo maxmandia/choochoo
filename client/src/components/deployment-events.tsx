@@ -29,7 +29,8 @@ function DeploymentEvents({ deployment }: { deployment: Deployment }) {
         "flex rounded-none items-center p-4 pl-14 gap-2 justify-start m-1 shadow-none border-none",
         deployment.status === DeploymentStatus.SUCCESS && "bg-green-50",
         (deployment.status === DeploymentStatus.BUILDING ||
-          deployment.status === DeploymentStatus.DEPLOYING) &&
+          deployment.status === DeploymentStatus.DEPLOYING ||
+          deployment.status === DeploymentStatus.INITIALIZING) &&
           "bg-blue-50"
       )}
     >
@@ -38,7 +39,8 @@ function DeploymentEvents({ deployment }: { deployment: Deployment }) {
           "text-[12px]",
           deployment.status === DeploymentStatus.SUCCESS && "text-green-500",
           (deployment.status === DeploymentStatus.BUILDING ||
-            deployment.status === DeploymentStatus.DEPLOYING) &&
+            deployment.status === DeploymentStatus.DEPLOYING ||
+            deployment.status === DeploymentStatus.INITIALIZING) &&
             "text-blue-500"
         )}
       >
@@ -54,7 +56,8 @@ function DeploymentEvents({ deployment }: { deployment: Deployment }) {
           "text-[12px]",
           deployment.status === DeploymentStatus.SUCCESS && "text-green-500",
           (deployment.status === DeploymentStatus.BUILDING ||
-            deployment.status === DeploymentStatus.DEPLOYING) &&
+            deployment.status === DeploymentStatus.DEPLOYING ||
+            deployment.status === DeploymentStatus.INITIALIZING) &&
             "text-blue-500"
         )}
       >

@@ -35,7 +35,8 @@ export function useGetDeployments(
             deployment.node.status === DeploymentStatus.SUCCESS ||
             deployment.node.status === DeploymentStatus.CRASHED ||
             deployment.node.status === DeploymentStatus.BUILDING ||
-            deployment.node.status === DeploymentStatus.DEPLOYING
+            deployment.node.status === DeploymentStatus.DEPLOYING ||
+            deployment.node.status === DeploymentStatus.INITIALIZING
           ) {
             activeDeployments.push(deployment.node);
           } else {

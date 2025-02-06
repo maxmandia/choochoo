@@ -26,7 +26,8 @@ function DeploymentCard({
           deployment.status === DeploymentStatus.CRASHED &&
             "border-red-500 border-solid border-[1px]",
           (deployment.status === DeploymentStatus.BUILDING ||
-            deployment.status === DeploymentStatus.DEPLOYING) &&
+            deployment.status === DeploymentStatus.DEPLOYING ||
+            deployment.status === DeploymentStatus.INITIALIZING) &&
             "border-blue-200 border-solid border-[1px]"
         )}
       >
@@ -39,7 +40,8 @@ function DeploymentCard({
               "bg-gray-100",
             deployment.status === DeploymentStatus.CRASHED && "bg-red-50",
             (deployment.status === DeploymentStatus.BUILDING ||
-              deployment.status === DeploymentStatus.DEPLOYING) &&
+              deployment.status === DeploymentStatus.DEPLOYING ||
+              deployment.status === DeploymentStatus.INITIALIZING) &&
               "bg-blue-50"
           )}
         >
@@ -55,7 +57,8 @@ function DeploymentCard({
                 deployment.status === DeploymentStatus.CRASHED &&
                   "text-red-500 bg-red-100",
                 (deployment.status === DeploymentStatus.BUILDING ||
-                  deployment.status === DeploymentStatus.DEPLOYING) &&
+                  deployment.status === DeploymentStatus.DEPLOYING ||
+                  deployment.status === DeploymentStatus.INITIALIZING) &&
                   "bg-blue-100 text-blue-500 hover:bg-blue-200"
               )}
             >

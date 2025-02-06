@@ -5,6 +5,7 @@ export enum DeploymentStatus {
   BUILDING = "BUILDING",
   DEPLOYING = "DEPLOYING",
   REMOVING = "REMOVING",
+  INITIALIZING = "INITIALIZING",
 }
 
 export enum DeploymentEventStep {
