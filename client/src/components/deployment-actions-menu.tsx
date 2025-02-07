@@ -79,7 +79,7 @@ function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
       {(deployment.status === DeploymentStatus.SUCCESS ||
         deployment.status === DeploymentStatus.CRASHED) && (
         <DropdownMenu>
-          <DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild>
             <Button
               variant={"outline"}
               className={cn(
@@ -93,7 +93,7 @@ function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
               <EllipsisVerticalIcon />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {deployment.status === DeploymentStatus.SUCCESS && (
