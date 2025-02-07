@@ -52,16 +52,18 @@ function App() {
 
   return (
     <div className="bg-gray-100 w-screen min-h-screen flex font-sans">
-      <div className="flex flex-col items-start justify-start bg-white w-[50%] mx-auto p-8 my-10 border-solid border-[1px] border-gray-300 shadow-lg max-h-[90vh] overflow-hidden">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col items-start justify-start bg-white w-full min-h-screen mx-auto p-4 border-solid border-0 md:border-[1px] md:border-gray-300 md:shadow-lg md:max-h-[90vh] md:min-h-0 overflow-hidden md:w-[75%] md:p-8 md:my-10 lg:w-[50%]">
+        <div className="flex items-center gap-2 w-full">
           <img
-            className="w-[30px] object-contain rounded-full"
+            className="w-[25px] md:w-[30px] object-contain rounded-full"
             src={data?.service.icon}
             alt="logo"
           />
-          <h1 className="text-[22px] font-semibold">{data?.service.name}</h1>
+          <h1 className="text-[18px] md:text-[22px] font-semibold">
+            {data?.service.name}
+          </h1>
         </div>
-        <Separator className="my-4" />
+        <Separator className="my-3 md:my-4" />
         <DeploymentCardContainer>
           {deployments?.activeDeployments.length &&
             deployments.activeDeployments.length > 0 && (

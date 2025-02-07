@@ -33,7 +33,7 @@ function DeploymentCard({
       >
         <Card
           className={cn(
-            "flex rounded-none items-center p-4 gap-6 justify-between m-1 shadow-none border-none",
+            "flex md:flex-row rounded-none items-start md:items-center p-3 md:p-4 gap-3 md:gap-6 justify-between m-1 shadow-none border-none",
             deployment.status === DeploymentStatus.SUCCESS && "bg-green-50",
             (deployment.status === DeploymentStatus.REMOVED ||
               deployment.status === DeploymentStatus.REMOVING) &&
@@ -45,10 +45,10 @@ function DeploymentCard({
               "bg-blue-50"
           )}
         >
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 w-full md:w-auto">
             <Badge
               className={cn(
-                "rounded-sm font-normal",
+                "rounded-sm font-normal w-fit",
                 deployment.status === DeploymentStatus.SUCCESS &&
                   "bg-green-100 text-green-500 hover:bg-green-200",
                 (deployment.status === DeploymentStatus.REMOVED ||
@@ -66,13 +66,15 @@ function DeploymentCard({
             </Badge>
             <div className="flex items-center gap-2">
               <img
-                className="h-[30px] object-contain rounded-full"
+                className="h-[25px] md:h-[30px] object-contain rounded-full"
                 src={deployment.creator.avatar}
                 alt="avatar"
               />
               <div className="flex flex-col">
-                <span>{deployment.meta.commitMessage}</span>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm md:text-base">
+                  {deployment.meta.commitMessage}
+                </span>
+                <span className="text-xs md:text-sm text-muted-foreground">
                   {formatDistanceToNow(new Date(deployment.updatedAt), {
                     addSuffix: true,
                   })}

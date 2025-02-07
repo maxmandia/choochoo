@@ -26,7 +26,7 @@ function DeploymentEvents({ deployment }: { deployment: Deployment }) {
   return (
     <Card
       className={cn(
-        "flex rounded-none items-center p-4 pl-14 gap-2 justify-start m-1 shadow-none border-none",
+        "flex rounded-none items-center p-3 md:p-4 pl-8 md:pl-14 gap-2 justify-start m-1 shadow-none border-none",
         deployment.status === DeploymentStatus.SUCCESS && "bg-green-50",
         (deployment.status === DeploymentStatus.BUILDING ||
           deployment.status === DeploymentStatus.DEPLOYING ||
@@ -36,7 +36,7 @@ function DeploymentEvents({ deployment }: { deployment: Deployment }) {
     >
       <span
         className={cn(
-          "text-[12px] font-semibold",
+          "text-[11px] md:text-[12px] font-semibold",
           deployment.status === DeploymentStatus.SUCCESS && "text-green-500",
           (deployment.status === DeploymentStatus.BUILDING ||
             deployment.status === DeploymentStatus.DEPLOYING ||
@@ -53,7 +53,7 @@ function DeploymentEvents({ deployment }: { deployment: Deployment }) {
       </span>
       <span
         className={cn(
-          "text-[12px]",
+          "text-[11px] md:text-[12px]",
           deployment.status === DeploymentStatus.SUCCESS && "text-green-500",
           (deployment.status === DeploymentStatus.BUILDING ||
             deployment.status === DeploymentStatus.DEPLOYING ||
