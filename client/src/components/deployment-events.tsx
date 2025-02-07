@@ -36,7 +36,7 @@ function DeploymentEvents({ deployment }: { deployment: Deployment }) {
     >
       <span
         className={cn(
-          "text-[12px]",
+          "text-[12px] font-semibold",
           deployment.status === DeploymentStatus.SUCCESS && "text-green-500",
           (deployment.status === DeploymentStatus.BUILDING ||
             deployment.status === DeploymentStatus.DEPLOYING ||

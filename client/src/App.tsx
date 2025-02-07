@@ -52,7 +52,7 @@ function App() {
 
   return (
     <div className="bg-gray-100 w-screen min-h-screen flex font-sans">
-      <div className="flex flex-col items-start justify-start bg-white w-[50%] mx-auto p-8 my-10 border-solid border-[1px] border-gray-300 shadow-lg">
+      <div className="flex flex-col items-start justify-start bg-white w-[50%] mx-auto p-8 my-10 border-solid border-[1px] border-gray-300 shadow-lg max-h-[90vh] overflow-hidden">
         <div className="flex items-center gap-2">
           <img
             className="w-[30px] object-contain rounded-full"
@@ -82,7 +82,7 @@ function App() {
         <Button
           onClick={() => setShowHistory(!showHistory)}
           variant="ghost"
-          className="flex items-center gap-2 w-fit py-1"
+          className="flex-shrink-0 flex items-center gap-2 w-fit py-1"
         >
           <LucideArrowDown
             className={cn(
@@ -94,13 +94,13 @@ function App() {
         </Button>
         <DeploymentCardContainer
           className={cn(
-            "grid transition-[grid-template-rows] duration-300 flex-grow max-h-[500px]",
+            "grid transition-[grid-template-rows] duration-300 flex-grow max-h-[600px] min-h-0",
             showHistory ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
           )}
         >
           <div
             ref={scrollContainerRef}
-            className="overflow-y-scroll flex flex-col gap-2 h-full min-h-0"
+            className="overflow-y-scroll flex flex-col gap-4 flex-grow"
           >
             {deployments?.priorDeployments.map((deployment: Deployment) => (
               <DeploymentCard key={deployment.id} deployment={deployment} />
