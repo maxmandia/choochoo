@@ -20,8 +20,18 @@ export async function graphqlRequest<T>({
 
   const data = await response.json();
 
+  if (!response.ok) {
+    throw new Error(
+      data?.errors?.[0]?.message ||
+        "An error occurred while processing your request"
+    );
+  }
+
   if (data.errors) {
-    throw new Error(data.errors[0].message);
+    const errorMessage =
+      data?.errors?.[0]?.message ||
+      "An error occurred while processing your request";
+    throw new Error(errorMessage);
   }
   return data.data as T;
 }

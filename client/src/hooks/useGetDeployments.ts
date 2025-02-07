@@ -15,61 +15,72 @@ export function useGetDeployments(
     queryKey: ["deployments"],
     initialPageParam: null,
     queryFn: async ({ pageParam = null }) => {
-      const data = await graphqlRequest<ServiceData>({
-        query: GET_DEPLOYMENTS,
-        variables: {
-          input: {
-            serviceId,
-            projectId,
-            environmentId,
+      try {
+        const data = await graphqlRequest<ServiceData>({
+          query: GET_DEPLOYMENTS,
+          variables: {
+            input: {
+              serviceId,
+              projectId,
+              environmentId,
+            },
+            first: pageSize,
+            after: pageParam,
           },
-          first: pageSize,
-          after: pageParam,
-        },
-      });
+        });
 
-      let activeDeployments: Deployment[] = [];
-      let priorDeployments: Deployment[] = [];
+        if (!data) {
+          throw new Error("No data received from the server");
+        }
 
-      if (data?.deployments?.edges) {
-        for (const deployment of data.deployments.edges) {
-          if (
-            deployment.node.status === DeploymentStatus.SUCCESS ||
-            deployment.node.status === DeploymentStatus.CRASHED ||
-            deployment.node.status === DeploymentStatus.BUILDING ||
-            deployment.node.status === DeploymentStatus.DEPLOYING ||
-            deployment.node.status === DeploymentStatus.INITIALIZING
-          ) {
-            activeDeployments.push(deployment.node);
-          } else {
-            priorDeployments.push(deployment.node);
+        let activeDeployments: Deployment[] = [];
+        let priorDeployments: Deployment[] = [];
+
+        if (data?.deployments?.edges) {
+          for (const deployment of data.deployments.edges) {
+            if (
+              deployment.node.status === DeploymentStatus.SUCCESS ||
+              deployment.node.status === DeploymentStatus.CRASHED ||
+              deployment.node.status === DeploymentStatus.BUILDING ||
+              deployment.node.status === DeploymentStatus.DEPLOYING ||
+              deployment.node.status === DeploymentStatus.INITIALIZING
+            ) {
+              activeDeployments.push(deployment.node);
+            } else {
+              priorDeployments.push(deployment.node);
+            }
           }
         }
+
+        // when we recieve a new deployment event, we refetch deployments inside the web socket context.
+        // however, deployement statuses can change after the last deployment event is recieved
+        // so we need to refetch the deployments again here if either of the following are true:
+        // 1. there is a deployment that is being removed
+        // 2. there are more than 1 deployment that has a status of success
+        setTimeout(() => {
+          if (
+            priorDeployments.some(
+              (deployment) => deployment.status === DeploymentStatus.REMOVING
+            ) ||
+            activeDeployments.filter(
+              (deployment) => deployment.status === DeploymentStatus.SUCCESS
+            ).length > 1
+          ) {
+            queryClient.invalidateQueries({ queryKey: ["deployments"] });
+          }
+        }, 1000);
+
+        return {
+          activeDeployments,
+          priorDeployments,
+          pageInfo: data?.deployments?.pageInfo,
+        };
+      } catch (error) {
+        // Re-throw the error to be handled by the QueryCache
+        throw error instanceof Error
+          ? error
+          : new Error("An unknown error occurred");
       }
-
-      // when we recieve a new deployment event, we refetch deployments inside the web socket context.
-      // however, deployement statuses can change after the last deployment event is recieved
-      // so we need to refetch the deployments again here if either of the following are true:
-      // 1. there is a deployment that is being removed
-      // 2. there are more than 1 deployment that has a status of success
-      setTimeout(() => {
-        if (
-          priorDeployments.some(
-            (deployment) => deployment.status === DeploymentStatus.REMOVING
-          ) ||
-          activeDeployments.filter(
-            (deployment) => deployment.status === DeploymentStatus.SUCCESS
-          ).length > 1
-        ) {
-          queryClient.invalidateQueries({ queryKey: ["deployments"] });
-        }
-      }, 1000);
-
-      return {
-        activeDeployments,
-        priorDeployments,
-        pageInfo: data?.deployments?.pageInfo,
-      };
     },
     getNextPageParam: (lastPage) => lastPage.pageInfo?.endCursor,
     select: (data) => ({

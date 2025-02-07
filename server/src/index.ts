@@ -1,4 +1,4 @@
-import express from "express";
+import express, { RequestHandler, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import axios from "axios";
@@ -108,7 +108,7 @@ wss.on("connection", (websocket) => {
   });
 });
 
-app.post("/graphql", async (req, res) => {
+app.post("/graphql", (async (req: Request, res: Response) => {
   const graphQLEndpoint = "https://backboard.railway.com/graphql/v2";
   const { query, variables } = req.body;
   try {
@@ -121,12 +121,29 @@ app.post("/graphql", async (req, res) => {
       },
       data: { query, variables },
     });
+
+    if (response.data.errors && response.data.errors.length > 0) {
+      return res.status(400).json({
+        errors: response.data.errors,
+      });
+    }
+
     res.json(response.data);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error calling external GraphQL API:", error);
-    res.status(500).json({ error: "Internal server error" });
+
+    // For other types of errors, send a generic error message
+    res.status(500).json({
+      errors: [
+        {
+          message:
+            error?.response?.data?.errors?.[0]?.message ??
+            "An unknown error occurred",
+        },
+      ],
+    });
   }
-});
+}) as RequestHandler);
 
 // Start server (modified to use HTTP server instance)
 server.listen(port, () => {

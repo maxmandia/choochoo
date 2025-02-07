@@ -16,6 +16,7 @@ import { useStopDeployment } from "@/hooks/useStopDeployement";
 import { useDeploymentRedeploy } from "@/hooks/useDeploymentRedeploy";
 import { useWebSocket } from "@/context/web-socket-context";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
   const queryClient = useQueryClient();
@@ -29,27 +30,39 @@ function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
 
   async function actionHandler(action: string) {
     switch (action) {
-      case "stop":
+      case "stop": {
         await stopDeployment(deployment.id);
-        // invalidate the deployments query after 5 seconds to fetch crashed status
-        // this is a hack to get the deployment status to update (ideally we would use a websocket)
+        toast.loading("Stopping deployment", {
+          description: "This may take a few seconds",
+          duration: 5000,
+        });
+        // Wait for status update (hacky, ideally we subscribe to the deployment status)
         setTimeout(() => {
           queryClient.invalidateQueries({ queryKey: ["deployments"] });
         }, 5000);
         break;
-      case "redeploy":
+      }
+      case "redeploy": {
         unsubscribeFromDeployment();
         const {
           deploymentRedeploy: { id },
         } = await redeployDeployment(deployment.id);
-        // subscribe to the redeployed deployment
+        toast.success("Deployment in progress", {
+          description: "This may take a few minutes",
+        });
         subscribeToDeployment(id);
         break;
-      case "deploy":
+      }
+      case "deploy": {
         const deployedId = await deployService();
-        // subscribe to the recently deployed deployment
+        toast.success("Deployment in progress", {
+          description: "This may take a few minutes",
+        });
         subscribeToDeployment(deployedId);
         break;
+      }
+      default:
+        throw new Error(`Unknown action: ${action}`);
     }
   }
 
