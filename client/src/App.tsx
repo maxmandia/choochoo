@@ -8,15 +8,20 @@ import { cn } from "./lib/utils";
 import DeploymentCardContainer from "./components/deployment-card-container";
 import { Separator } from "./components/primitives/separator";
 import { Deployment } from "@/types";
+import DeploymentCardSkeleton from "./components/deployment-card-skeleton";
+import { Skeleton } from "./components/primitives/skeleton";
 
 function App() {
   const [showHistory, setShowHistory] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const { data } = useGetService("39cd327c-525b-414e-957c-3959a17486a2");
+  const { data, isLoading: isServiceLoading } = useGetService(
+    "39cd327c-525b-414e-957c-3959a17486a2"
+  );
   const {
     data: deployments,
     fetchNextPage,
     hasNextPage,
+    isLoading: isDeploymentsLoading,
   } = useGetDeployments(
     "39cd327c-525b-414e-957c-3959a17486a2",
     "5601a4f4-da8e-4978-9e2f-ac476d3cb851",
@@ -54,19 +59,30 @@ function App() {
     <div className="bg-gray-100 w-screen min-h-screen flex font-sans">
       <div className="flex flex-col items-start justify-start bg-white w-full min-h-screen mx-auto p-4 border-solid border-0 md:border-[1px] md:border-gray-300 md:shadow-lg md:max-h-[90vh] md:min-h-0 overflow-hidden md:w-[75%] md:p-8 md:my-10 lg:w-[50%]">
         <div className="flex items-center gap-2 w-full">
-          <img
-            className="w-[25px] md:w-[30px] object-contain rounded-full"
-            src={data?.service.icon}
-            alt="logo"
-          />
-          <h1 className="text-[18px] md:text-[22px] font-semibold">
-            {data?.service.name}
-          </h1>
+          {isServiceLoading ? (
+            <>
+              <Skeleton className="w-[25px] md:w-[30px] h-[25px] md:h-[30px] rounded-full" />
+              <Skeleton className="h-6 w-40" />
+            </>
+          ) : (
+            <>
+              <img
+                className="w-[25px] md:w-[30px] object-contain rounded-full"
+                src={data?.service.icon}
+                alt="logo"
+              />
+              <h1 className="text-[18px] md:text-[22px] font-semibold">
+                {data?.service.name}
+              </h1>
+            </>
+          )}
         </div>
         <Separator className="my-3 md:my-4" />
         <DeploymentCardContainer>
-          {deployments?.activeDeployments.length &&
-            deployments.activeDeployments.length > 0 && (
+          {isDeploymentsLoading ? (
+            <DeploymentCardSkeleton />
+          ) : (
+            deployments?.activeDeployments.length > 0 && (
               <>
                 {deployments.activeDeployments.map(
                   (deployment: Deployment, index: number) => (
@@ -78,7 +94,8 @@ function App() {
                   )
                 )}
               </>
-            )}
+            )
+          )}
         </DeploymentCardContainer>
 
         <Button
@@ -104,9 +121,17 @@ function App() {
             ref={scrollContainerRef}
             className="overflow-y-scroll flex flex-col gap-4 flex-grow"
           >
-            {deployments?.priorDeployments.map((deployment: Deployment) => (
-              <DeploymentCard key={deployment.id} deployment={deployment} />
-            ))}
+            {isDeploymentsLoading ? (
+              <>
+                <DeploymentCardSkeleton />
+                <DeploymentCardSkeleton />
+                <DeploymentCardSkeleton />
+              </>
+            ) : (
+              deployments?.priorDeployments.map((deployment: Deployment) => (
+                <DeploymentCard key={deployment.id} deployment={deployment} />
+              ))
+            )}
           </div>
         </DeploymentCardContainer>
       </div>
