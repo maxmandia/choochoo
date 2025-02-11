@@ -1,27 +1,24 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { Deployment } from "@/types";
 import { useGetDeploymentEvents } from "@/hooks/useGetDeploymentEvents";
 import { DeploymentStatus, DeploymentEventStep } from "@/types";
 import { Card } from "./primitives/card";
 import { cn } from "@/lib/utils";
-
-interface DeploymentEvent {
-  step: DeploymentEventStep;
-  message: string;
-  timestamp: string;
-}
+import DeploymentEventsSkeleton from "./deployment-events-skeleton";
 
 function DeploymentEvents({ deployment }: { deployment: Deployment }) {
-  const queryClient = useQueryClient();
-  const deploymentEvents = queryClient.getQueryData<DeploymentEvent[]>([
-    "deploymentEvents",
-  ]);
-
-  useGetDeploymentEvents(deployment.id, {
+  const {
+    data: deploymentEvents,
+    isLoading,
+    isError,
+  } = useGetDeploymentEvents(deployment.id, {
     enabled:
       Boolean(deployment.id) &&
       Boolean(deployment.status === DeploymentStatus.SUCCESS),
   });
+
+  if (isLoading || isError) {
+    return <DeploymentEventsSkeleton status={deployment.status} />;
+  }
 
   return (
     <Card
