@@ -62,7 +62,7 @@ function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
     }
   }
 
-  // If the deployment is not success or crashed, don't render the menu
+  // If the deployment is not in a success or crashed state, don't render the menu
   if (
     deployment.status !== DeploymentStatus.SUCCESS &&
     deployment.status !== DeploymentStatus.CRASHED
@@ -97,9 +97,11 @@ function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
                 <DropdownMenuItem onClick={() => actionHandler("stop")}>
                   Stop
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => actionHandler("redeploy")}>
-                  Redeploy
-                </DropdownMenuItem>
+                {deployment.canRedeploy && (
+                  <DropdownMenuItem onClick={() => actionHandler("redeploy")}>
+                    Redeploy
+                  </DropdownMenuItem>
+                )}
               </>
             )}
             {deployment.status === DeploymentStatus.CRASHED && (

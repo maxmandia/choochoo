@@ -118,6 +118,7 @@ app.post("/graphql", (async (req: Request, res: Response) => {
       data: { query, variables },
     });
 
+    // handle errors coming from the public GraphQL API
     if (response.data.errors && response.data.errors.length > 0) {
       return res.status(400).json({
         errors: response.data.errors,
@@ -141,7 +142,6 @@ app.post("/graphql", (async (req: Request, res: Response) => {
   }
 }) as RequestHandler);
 
-// Start server (modified to use HTTP server instance)
 server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
