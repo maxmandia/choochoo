@@ -12,8 +12,6 @@ export const DEPLOYMENT_EVENTS_SUBSCRIPTION = `
     deploymentEvents(id: $id) {
       id
       step
-      message
-      timestamp
     }
   }
 `;

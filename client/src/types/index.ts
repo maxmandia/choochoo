@@ -23,8 +23,6 @@ export enum DeploymentEventStep {
 export interface DeploymentEvent {
   id: string;
   step: DeploymentEventStep;
-  message: string;
-  timestamp: string;
 }
 
 export interface Deployment {
