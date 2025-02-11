@@ -15,10 +15,12 @@ import { useServiceDeploy } from "@/hooks/useServiceDeploy";
 import { useStopDeployment } from "@/hooks/useStopDeployement";
 import { useDeploymentRedeploy } from "@/hooks/useDeploymentRedeploy";
 import { useWebSocket } from "@/context/web-socket-context";
+import { toast } from "sonner";
+
 function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
-  const { unsubscribeFromDeployment, subscribeToDeployment } = useWebSocket();
-  const { mutate: stopDeployment } = useStopDeployment();
-  const { mutate: deployService } = useServiceDeploy(
+  const { subscribeToDeploymentEvents, subscribeToDeployment } = useWebSocket();
+  const { mutateAsync: stopDeployment } = useStopDeployment();
+  const { mutateAsync: deployService } = useServiceDeploy(
     "96fbbfd7-6939-4fc5-9022-954774f26bd9",
     "39cd327c-525b-414e-957c-3959a17486a2"
   );
@@ -26,20 +28,37 @@ function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
 
   async function actionHandler(action: string) {
     switch (action) {
-      case "stop":
-        stopDeployment(deployment.id);
+      case "stop": {
+        await stopDeployment(deployment.id);
+        toast.loading("Stopping deployment", {
+          description: "This may take a few seconds",
+        });
+        subscribeToDeployment(deployment.id);
         break;
-      case "redeploy":
-        unsubscribeFromDeployment();
+      }
+      case "redeploy": {
+        // subscribe to most recent deployment so we know when it's removed
+        subscribeToDeployment(deployment.id);
         const {
           deploymentRedeploy: { id },
         } = await redeployDeployment(deployment.id);
-        // subscribe to the redeployed deployment
-        subscribeToDeployment(id);
+        toast.success("Deployment in progress", {
+          description: "This may take a few minutes",
+        });
+        // subscribe to new events for the redeployed deployment
+        subscribeToDeploymentEvents(id);
         break;
-      case "deploy":
-        deployService();
+      }
+      case "deploy": {
+        const deployedId = await deployService();
+        toast.success("Deployment in progress", {
+          description: "This may take a few minutes",
+        });
+        subscribeToDeploymentEvents(deployedId);
         break;
+      }
+      default:
+        throw new Error(`Unknown action: ${action}`);
     }
   }
 
@@ -56,21 +75,21 @@ function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
       {(deployment.status === DeploymentStatus.SUCCESS ||
         deployment.status === DeploymentStatus.CRASHED) && (
         <DropdownMenu>
-          <DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild>
             <Button
               variant={"outline"}
               className={cn(
                 "px-3 py-1",
                 deployment.status === DeploymentStatus.SUCCESS &&
-                  "bg-transparent border-[hsl(152_38%_80%)] text-[hsl(152_38%_42%)] hover:bg-[hsl(152_38%_91%)] hover:text-[hsl(152_38%_42%)]",
+                  "bg-transparent border-green-200 text-green-500 hover:bg-green-100 hover:text-green-500",
                 deployment.status === DeploymentStatus.CRASHED &&
-                  "bg-transparent border-[hsl(1_62%_44%)] text-[hsl(1_62%_44%)] hover:text-[hsl(1_62%_44%)] hover:bg-[hsl(1_68%_95%)]"
+                  "bg-transparent border-red-500 text-red-500 hover:text-red-500 hover:bg-red-100"
               )}
             >
               <EllipsisVerticalIcon />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {deployment.status === DeploymentStatus.SUCCESS && (

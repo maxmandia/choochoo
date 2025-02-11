@@ -1,7 +1,8 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { GET_DEPLOYMENTS } from "../api/queries";
 import { graphqlRequest } from "../api/graphqlClient";
-import { Deployment, DeploymentStatus, ServiceData } from "@/types";
+import { ServiceData } from "@/types";
+import { organizeDeployments } from "@/lib/helpers/organize-deployments";
 
 export function useGetDeployments(
   serviceId: string,
@@ -9,61 +10,39 @@ export function useGetDeployments(
   environmentId: string,
   pageSize: number = 10
 ) {
-  const queryClient = useQueryClient();
-
-  return useQuery({
-    queryKey: ["deployments", serviceId, projectId, environmentId, pageSize],
-    queryFn: async () => {
-      const data = await graphqlRequest<ServiceData>({
-        query: GET_DEPLOYMENTS,
-        variables: {
-          input: {
-            serviceId,
-            projectId,
-            environmentId,
+  return useInfiniteQuery<any, Error, any, string[], string | null>({
+    queryKey: ["deployments"],
+    initialPageParam: null,
+    queryFn: async ({ pageParam = null }) => {
+      try {
+        const data = await graphqlRequest<ServiceData>({
+          query: GET_DEPLOYMENTS,
+          variables: {
+            input: {
+              serviceId,
+              projectId,
+              environmentId,
+            },
+            first: pageSize,
+            after: pageParam,
           },
-          first: pageSize,
-        },
-      });
+        });
 
-      let activeDeployments: Deployment[] = [];
-      let priorDeployments: Deployment[] = [];
-
-      if (data?.deployments?.edges) {
-        for (const deployment of data.deployments.edges) {
-          if (
-            deployment.node.status === DeploymentStatus.SUCCESS ||
-            deployment.node.status === DeploymentStatus.CRASHED ||
-            deployment.node.status === DeploymentStatus.BUILDING ||
-            deployment.node.status === DeploymentStatus.DEPLOYING
-          ) {
-            activeDeployments.push(deployment.node);
-          } else {
-            priorDeployments.push(deployment.node);
-          }
-        }
+        // organize the deployments into active and prior deployments
+        return organizeDeployments(data);
+      } catch (error) {
+        // Re-throw the error to be handled by the QueryCache
+        throw error instanceof Error
+          ? error
+          : new Error("An unknown error occurred");
       }
-
-      // when we recieve a new deployment event, we refetch deployments inside the web socket context.
-      // however, deployement statuses can change after the last deployment event is recieved
-      // so we need to refetch the deployments again here if either of the following are true:
-      // 1. there is a deployment that is being removed
-      // 2. there are more than 1 deployment that has a status of success
-      setTimeout(() => {
-        if (
-          priorDeployments.some(
-            (deployment) => deployment.status === DeploymentStatus.REMOVING
-          ) ||
-          activeDeployments.filter(
-            (deployment) => deployment.status === DeploymentStatus.SUCCESS
-          ).length > 1
-        ) {
-          queryClient.invalidateQueries({ queryKey: ["deployments"] });
-        }
-      }, 1000);
-
-      return { activeDeployments, priorDeployments };
     },
-    select: (data) => data ?? { activeDeployments: [], priorDeployments: [] },
+    getNextPageParam: (lastPage) => lastPage.pageInfo?.endCursor,
+    select: (data) => ({
+      pages: data.pages,
+      pageParams: data.pageParams,
+      activeDeployments: data.pages[0].activeDeployments,
+      priorDeployments: data.pages.flatMap((page) => page.priorDeployments),
+    }),
   });
 }

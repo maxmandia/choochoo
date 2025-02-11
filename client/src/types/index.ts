@@ -5,6 +5,24 @@ export enum DeploymentStatus {
   BUILDING = "BUILDING",
   DEPLOYING = "DEPLOYING",
   REMOVING = "REMOVING",
+  INITIALIZING = "INITIALIZING",
+}
+
+export enum DeploymentEventStep {
+  BUILD_IMAGE = "BUILD_IMAGE",
+  CREATE_CONTAINER = "CREATE_CONTAINER",
+  DRAIN_INSTANCES = "DRAIN_INSTANCES",
+  HEALTHCHECK = "HEALTHCHECK",
+  MIGRATE_VOLUMES = "MIGRATE_VOLUMES",
+  PRE_DEPLOY_COMMAND = "PRE_DEPLOY_COMMAND",
+  PUBLISH_IMAGE = "PUBLISH_IMAGE",
+  SNAPSHOT_CODE = "SNAPSHOT_CODE",
+  WAIT_FOR_DEPENDENCIES = "WAIT_FOR_DEPENDENCIES",
+}
+
+export interface DeploymentEvent {
+  id: string;
+  step: DeploymentEventStep;
 }
 
 export interface Deployment {
@@ -46,4 +64,8 @@ export interface ServiceData {
       endCursor: string;
     };
   };
+}
+
+export interface ServiceInstanceDeployData {
+  serviceInstanceDeployV2: string;
 }

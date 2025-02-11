@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useContext,
   useEffect,
@@ -6,23 +6,22 @@ import React, {
   ReactNode,
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-
+import {
+  DEPLOYMENT_SUBSCRIPTION,
+  DEPLOYMENT_EVENTS_SUBSCRIPTION,
+} from "../api/subscriptions";
+import { DeploymentEvent } from "../types";
 interface IWebSocketContext {
   ws: WebSocket | null;
   subscribeToDeployment: (deploymentId: string) => void;
   unsubscribeFromDeployment: () => void;
+  subscribeToDeploymentEvents: (deploymentId: string) => void;
+  unsubscribeFromDeploymentEvents: () => void;
 }
 
 const WebSocketContext = createContext<IWebSocketContext | undefined>(
   undefined
 );
-
-interface DeploymentEvent {
-  step: string;
-  message: string;
-  timestamp: string;
-  // add other properties as needed
-}
 
 export function WebSocketProvider({ children }: { children: ReactNode }) {
   const [ws, setWs] = useState<WebSocket | null>(null);
@@ -35,17 +34,28 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
     wsInstance.onmessage = (event) => {
       const result = JSON.parse(event.data);
 
-      if (!queryClient.getQueryData(["deploymentEvents"])) {
-        queryClient.setQueryData(["deploymentEvents"], []);
+      switch (result.type) {
+        case "deployment":
+          // meta field is null for whatever reason and can't be used to update the deployment
+          // since we rely on the meta field in our components so we just invalidate the deployments query
+          // and refetch all of the data... odd!
+          queryClient.invalidateQueries({ queryKey: ["deployments"] });
+          break;
+
+        case "deploymentEvents":
+          queryClient.setQueryData<DeploymentEvent[]>(
+            ["deploymentEvents"],
+            (oldEvents = []) => [
+              ...oldEvents,
+              result.data.data.deploymentEvents,
+            ]
+          );
+          // invalidate deployments query so we can get latest deployment status - this is preferred
+          // to subscribing to the deployment itself since deploy events appear much sooner than deploy status changes and
+          // the UI is delayed as a result, so we invalidate the deployments query to get the latest deployment statuses instead.
+          queryClient.invalidateQueries({ queryKey: ["deployments"] });
+          break;
       }
-
-      queryClient.setQueryData<DeploymentEvent[]>(
-        ["deploymentEvents"],
-        (oldEvents = []) => [...oldEvents, result.data.deploymentEvents]
-      );
-
-      // invalidate deployments query to refetch the latest data on every new event that comes in
-      queryClient.invalidateQueries({ queryKey: ["deployments"] });
     };
 
     wsInstance.onopen = () => {
@@ -63,13 +73,33 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
 
   const subscribeToDeployment = (deploymentId: string) => {
     if (ws?.readyState === WebSocket.OPEN) {
-      console.info("Subscribing to deployment", deploymentId);
       ws.send(
         JSON.stringify({
           type: "subscribe",
-          deploymentId,
-          filter: "",
-          limit: 100,
+          variables: { id: deploymentId },
+          query: DEPLOYMENT_SUBSCRIPTION,
+        })
+      );
+    }
+  };
+
+  const unsubscribeFromDeploymentEvents = () => {
+    if (ws?.readyState === WebSocket.OPEN) {
+      ws.send(
+        JSON.stringify({
+          type: "unsubscribe",
+        })
+      );
+    }
+  };
+
+  const subscribeToDeploymentEvents = (deploymentId: string) => {
+    if (ws?.readyState === WebSocket.OPEN) {
+      ws.send(
+        JSON.stringify({
+          type: "subscribe",
+          variables: { id: deploymentId },
+          query: DEPLOYMENT_EVENTS_SUBSCRIPTION,
         })
       );
     }
@@ -91,6 +121,8 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         ws,
         subscribeToDeployment,
         unsubscribeFromDeployment,
+        subscribeToDeploymentEvents,
+        unsubscribeFromDeploymentEvents,
       }}
     >
       {children}

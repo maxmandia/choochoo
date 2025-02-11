@@ -1,15 +1,16 @@
-import React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Deployment } from "@/types";
 import { useGetDeploymentEvents } from "@/hooks/useGetDeploymentEvents";
-import { DeploymentStatus } from "@/types";
+import { DeploymentStatus, DeploymentEventStep } from "@/types";
 import { Card } from "./primitives/card";
+import { cn } from "@/lib/utils";
 
 interface DeploymentEvent {
-  step: string;
+  step: DeploymentEventStep;
   message: string;
   timestamp: string;
 }
+
 function DeploymentEvents({ deployment }: { deployment: Deployment }) {
   const queryClient = useQueryClient();
   const deploymentEvents = queryClient.getQueryData<DeploymentEvent[]>([
@@ -24,15 +25,48 @@ function DeploymentEvents({ deployment }: { deployment: Deployment }) {
 
   return (
     <Card
-      className={
-        "flex rounded-none items-center p-4 pl-14 gap-2 justify-start m-1 shadow-none border-none bg-[#F4FAF8]"
-      }
+      className={cn(
+        "flex rounded-none items-center p-3 md:p-4 pl-8 md:pl-14 gap-2 justify-start m-1 shadow-none border-none",
+        deployment.status === DeploymentStatus.SUCCESS && "bg-green-50",
+        (deployment.status === DeploymentStatus.BUILDING ||
+          deployment.status === DeploymentStatus.DEPLOYING ||
+          deployment.status === DeploymentStatus.INITIALIZING) &&
+          "bg-blue-50"
+      )}
     >
-      <span className="text-[12px] text-[hsl(152_38%_42%)]">
-        Deployement in progress:
+      <span
+        className={cn(
+          "text-[11px] md:text-[12px] font-semibold",
+          deployment.status === DeploymentStatus.SUCCESS && "text-green-500",
+          (deployment.status === DeploymentStatus.BUILDING ||
+            deployment.status === DeploymentStatus.DEPLOYING ||
+            deployment.status === DeploymentStatus.INITIALIZING) &&
+            "text-blue-500"
+        )}
+      >
+        {deploymentEvents &&
+        deploymentEvents.length > 0 &&
+        deploymentEvents[deploymentEvents.length - 1].step ===
+          DeploymentEventStep.DRAIN_INSTANCES
+          ? "Status:"
+          : "Deployment in progress:"}
       </span>
-      <span className="text-[12px] text-[hsl(152_38%_42%)]">
-        {deploymentEvents?.[deploymentEvents.length - 1].step}
+      <span
+        className={cn(
+          "text-[11px] md:text-[12px]",
+          deployment.status === DeploymentStatus.SUCCESS && "text-green-500",
+          (deployment.status === DeploymentStatus.BUILDING ||
+            deployment.status === DeploymentStatus.DEPLOYING ||
+            deployment.status === DeploymentStatus.INITIALIZING) &&
+            "text-blue-500"
+        )}
+      >
+        {deploymentEvents && deploymentEvents.length > 0
+          ? deploymentEvents[deploymentEvents.length - 1].step ===
+            DeploymentEventStep.DRAIN_INSTANCES
+            ? "Success"
+            : deploymentEvents[deploymentEvents.length - 1].step
+          : "Unknown"}
       </span>
     </Card>
   );
