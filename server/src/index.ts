@@ -48,7 +48,14 @@ wss.on("connection", (websocket) => {
         },
         {
           next: (data: any) => {
-            // TODO: handle data.errors[0];
+            // handle errors coming from the public GraphQL API
+            if (data?.data?.errors && data?.data?.errors.length > 0) {
+              websocket.send(
+                JSON.stringify({
+                  error: data?.data?.errors[0],
+                })
+              );
+            }
 
             websocket.send(
               JSON.stringify({
