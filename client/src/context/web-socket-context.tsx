@@ -52,7 +52,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
           );
           // invalidate deployments query so we can get latest deployment status - this is preferred
           // to subscribing to the deployment itself since deploy events appear much sooner than deploy status changes and
-          // the UI is delayed as a result, so we invalidate the deployments query to get the latest deployment statuses instead.
+          // the UI is delayed. Instead we invalidate the deployments query to get the latest deployment statuses.
           queryClient.invalidateQueries({ queryKey: ["deployments"] });
           break;
       }
