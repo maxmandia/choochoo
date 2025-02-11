@@ -69,3 +69,23 @@ export interface ServiceData {
 export interface ServiceInstanceDeployData {
   serviceInstanceDeployV2: string;
 }
+
+export interface DeploymentPageInfo {
+  endCursor: string | null;
+  hasNextPage: boolean;
+}
+
+export interface Deployment {
+  id: string;
+}
+
+export interface DeploymentsQueryData {
+  pages: Array<{
+    activeDeployments: Deployment[];
+    priorDeployments: Deployment[];
+    pageInfo: DeploymentPageInfo;
+  }>;
+  pageParams: (string | null)[];
+  activeDeployments: Deployment[];
+  priorDeployments: Deployment[];
+}

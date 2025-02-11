@@ -2,7 +2,7 @@ import express, { RequestHandler, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import axios from "axios";
-import ws, { WebSocketServer } from "ws";
+import ws, { WebSocketServer, WebSocket as WSWebSocket } from "ws";
 import { createClient } from "graphql-ws";
 
 import http from "http";
@@ -19,7 +19,7 @@ const wss = new WebSocketServer({ server });
 app.use(cors());
 app.use(express.json());
 
-const activeSubscriptions = new Map();
+const activeSubscriptions = new Map<WSWebSocket, Map<string, () => void>>();
 
 wss.on("connection", (websocket) => {
   console.log("Client connected");
@@ -28,6 +28,11 @@ wss.on("connection", (websocket) => {
     const data = JSON.parse(message.toString());
 
     if (data.type === "subscribe") {
+      if (!data.subscriptionId) {
+        console.error("Missing subscriptionId");
+        return;
+      }
+
       const client = createClient({
         url: "wss://backboard.railway.com/graphql/v2",
         webSocketImpl: class CustomWebSocket extends ws {
@@ -47,20 +52,19 @@ wss.on("connection", (websocket) => {
           variables: data.variables,
         },
         {
-          next: (data: any) => {
-            // handle errors coming from the public GraphQL API
-            if (data?.data?.errors && data?.data?.errors.length > 0) {
+          next: (result: any) => {
+            if (result?.data?.errors && result?.data?.errors.length > 0) {
               websocket.send(
                 JSON.stringify({
-                  error: data?.data?.errors[0],
+                  error: result?.data?.errors[0],
                 })
               );
             }
 
             websocket.send(
               JSON.stringify({
-                data: data,
-                type: Object.keys(data.data)[0], // This is to tell the frontend what type of data is being sent
+                data: result,
+                type: Object.keys(result.data)[0], // this is to inform the client of the type of data to be recieved
               })
             );
           },
@@ -78,27 +82,37 @@ wss.on("connection", (websocket) => {
         }
       );
 
-      // Store the subscription function in the activeSubscriptions map
-      activeSubscriptions.set(websocket, () => {
-        subscription();
-      });
+      // Get or create the subscription map for this websocket connection
+      const subscriptions =
+        activeSubscriptions.get(websocket) || new Map<string, () => void>();
+      subscriptions.set(data.subscriptionId, subscription);
+      activeSubscriptions.set(websocket, subscriptions);
     }
 
     if (data.type === "unsubscribe") {
-      const unsubscribe = activeSubscriptions.get(websocket);
-      if (unsubscribe) {
-        unsubscribe();
-        activeSubscriptions.delete(websocket);
-        console.log("Successfully unsubscribed from deployment events");
+      if (!data.subscriptionId) {
+        console.error("Missing subscriptionId in unsubscribe action");
+        return;
+      }
+
+      const subscriptions = activeSubscriptions.get(websocket);
+      if (subscriptions && subscriptions.has(data.subscriptionId)) {
+        console.log("current subscriptions", subscriptions);
+        subscriptions.get(data.subscriptionId)!();
+        subscriptions.delete(data.subscriptionId);
+        console.log(`Unsubscribed from subscription: ${data.subscriptionId}`);
+        console.log("current subscriptions after removal", subscriptions);
+      } else {
+        console.log("no subscription found");
       }
     }
   });
 
   websocket.on("close", () => {
     console.log("Client disconnected");
-    const unsubscribe = activeSubscriptions.get(websocket);
-    if (unsubscribe) {
-      unsubscribe();
+    const subscriptions = activeSubscriptions.get(websocket);
+    if (subscriptions) {
+      subscriptions.forEach((unsubscribe) => unsubscribe());
       activeSubscriptions.delete(websocket);
     }
   });

@@ -1,8 +1,9 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { GET_DEPLOYMENTS } from "../api/queries";
 import { graphqlRequest } from "../api/graphqlClient";
-import { ServiceData } from "@/types";
+import { DeploymentsQueryData, ServiceData } from "@/types";
 import { organizeDeployments } from "@/lib/helpers/organize-deployments";
+import { DeploymentPageInfo, Deployment } from "@/types";
 
 export function useGetDeployments(
   serviceId: string,
@@ -10,7 +11,17 @@ export function useGetDeployments(
   environmentId: string,
   pageSize: number = 10
 ) {
-  return useInfiniteQuery<any, Error, any, string[], string | null>({
+  return useInfiniteQuery<
+    {
+      activeDeployments: Deployment[];
+      priorDeployments: Deployment[];
+      pageInfo: DeploymentPageInfo;
+    },
+    Error,
+    DeploymentsQueryData,
+    string[],
+    string | null
+  >({
     queryKey: ["deployments"],
     initialPageParam: null,
     queryFn: async ({ pageParam = null }) => {
