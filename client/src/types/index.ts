@@ -20,6 +20,13 @@ export enum DeploymentEventStep {
   WAIT_FOR_DEPENDENCIES = "WAIT_FOR_DEPENDENCIES",
 }
 
+export interface DeploymentEvent {
+  id: string;
+  step: DeploymentEventStep;
+  message: string;
+  timestamp: string;
+}
+
 export interface Deployment {
   id: string;
   status: DeploymentStatus;

@@ -7,34 +7,27 @@ import { createClient } from "graphql-ws";
 
 import http from "http";
 
-// Initialize environment variables
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 9000;
 
-// Create HTTP server instance
 const server = http.createServer(app);
 
-// Create WebSocket server
 const wss = new WebSocketServer({ server });
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Store active subscriptions
 const activeSubscriptions = new Map();
 
-// WebSocket connection handler
 wss.on("connection", (websocket) => {
   console.log("Client connected");
 
   websocket.on("message", async (message) => {
     const data = JSON.parse(message.toString());
 
-    if (data.type === "subscribe" && data.deploymentId) {
-      // Create GraphQL WebSocket client
+    if (data.type === "subscribe") {
       const client = createClient({
         url: "wss://backboard.railway.com/graphql/v2",
         webSocketImpl: class CustomWebSocket extends ws {
@@ -48,23 +41,23 @@ wss.on("connection", (websocket) => {
         },
       });
 
-      // Subscribe to deployment logs
       const subscription = client.subscribe(
         {
-          query: `
-            subscription deployEventsSubscription($id: String!) {
-              deploymentEvents(id: $id) {
-                step
-              }
-            }
-          `,
-          variables: { id: data.deploymentId },
+          query: data.query,
+          variables: data.variables,
         },
         {
-          next: (data) => {
-            websocket.send(JSON.stringify(data));
+          next: (data: any) => {
+            // TODO: handle data.errors[0];
+
+            websocket.send(
+              JSON.stringify({
+                data: data,
+                type: Object.keys(data.data)[0], // This is to tell the frontend what type of data is being sent
+              })
+            );
           },
-          error: (err) => {
+          error: (err: any) => {
             console.error("Subscription error:", err);
             websocket.send(
               JSON.stringify({ error: "Subscription error occurred" })
@@ -78,11 +71,7 @@ wss.on("connection", (websocket) => {
         }
       );
 
-      console.log(
-        `Successfully subscribed to deployment events for ID: ${data.deploymentId}`
-      );
-
-      // Store cleanup function
+      // Store the subscription function in the activeSubscriptions map
       activeSubscriptions.set(websocket, () => {
         subscription();
       });

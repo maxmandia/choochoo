@@ -15,12 +15,10 @@ import { useServiceDeploy } from "@/hooks/useServiceDeploy";
 import { useStopDeployment } from "@/hooks/useStopDeployement";
 import { useDeploymentRedeploy } from "@/hooks/useDeploymentRedeploy";
 import { useWebSocket } from "@/context/web-socket-context";
-import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
-  const queryClient = useQueryClient();
-  const { unsubscribeFromDeployment, subscribeToDeployment } = useWebSocket();
+  const { subscribeToDeploymentEvents, subscribeToDeployment } = useWebSocket();
   const { mutateAsync: stopDeployment } = useStopDeployment();
   const { mutateAsync: deployService } = useServiceDeploy(
     "96fbbfd7-6939-4fc5-9022-954774f26bd9",
@@ -34,23 +32,21 @@ function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
         await stopDeployment(deployment.id);
         toast.loading("Stopping deployment", {
           description: "This may take a few seconds",
-          duration: 5000,
         });
-        // Wait for status update (hacky, ideally we subscribe to the deployment status)
-        setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ["deployments"] });
-        }, 5000);
+        subscribeToDeployment(deployment.id);
         break;
       }
       case "redeploy": {
-        unsubscribeFromDeployment();
+        // subscribe to most recent deployment so we know when it's removed
+        subscribeToDeployment(deployment.id);
         const {
           deploymentRedeploy: { id },
         } = await redeployDeployment(deployment.id);
         toast.success("Deployment in progress", {
           description: "This may take a few minutes",
         });
-        subscribeToDeployment(id);
+        // subscribe to new events for the redeployed deployment
+        subscribeToDeploymentEvents(id);
         break;
       }
       case "deploy": {
@@ -58,7 +54,7 @@ function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
         toast.success("Deployment in progress", {
           description: "This may take a few minutes",
         });
-        subscribeToDeployment(deployedId);
+        subscribeToDeploymentEvents(deployedId);
         break;
       }
       default:
