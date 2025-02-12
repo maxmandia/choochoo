@@ -29,10 +29,10 @@ function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
   async function actionHandler(action: string) {
     switch (action) {
       case "stop": {
-        await stopDeployment(deployment.id);
         toast.loading("Stopping deployment", {
           description: "This may take a few seconds",
         });
+        await stopDeployment(deployment.id);
         subscribeToDeployment(deployment.id);
         break;
       }
