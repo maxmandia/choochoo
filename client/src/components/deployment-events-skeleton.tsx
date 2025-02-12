@@ -1,5 +1,5 @@
-import { Card } from "./primitives/card";
-import { Skeleton } from "./primitives/skeleton";
+import { Card } from "@/components/primitives/card";
+import { Skeleton } from "@/components/primitives/skeleton";
 import { DeploymentStatus } from "@/types";
 import { cn } from "@/lib/utils";
 

@@ -8,8 +8,8 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { WebSocketProvider } from "./context/web-socket-context.tsx";
-import { Toaster } from "./components/primitives/sonner.tsx";
+import { WebSocketProvider } from "@/context/web-socket-context";
+import { Toaster } from "@/components/primitives/sonner";
 import { toast } from "sonner";
 
 const queryClient = new QueryClient({

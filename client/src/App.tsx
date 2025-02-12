@@ -1,16 +1,16 @@
-import { useGetService } from "./hooks/useGetService";
-import { useGetDeployments } from "./hooks/useGetDeployments";
-import DeploymentCard from "./components/deployment-card";
+import { useGetService } from "@/hooks/useGetService";
+import { useGetDeployments } from "@/hooks/useGetDeployments";
+import DeploymentCard from "@/components/deployment-card";
 import { LucideArrowDown } from "lucide-react";
-import { Button } from "./components/primitives/button";
+import { Button } from "@/components/primitives/button";
 import { useState, useEffect, useRef } from "react";
-import { cn } from "./lib/utils";
-import DeploymentCardContainer from "./components/deployment-card-container";
-import { Separator } from "./components/primitives/separator";
+import { cn } from "@/lib/utils";
+import DeploymentCardContainer from "@/components/deployment-card-container";
+import { Separator } from "@/components/primitives/separator";
 import { Deployment } from "@/types";
-import DeploymentCardSkeleton from "./components/deployment-card-skeleton";
-import { Skeleton } from "./components/primitives/skeleton";
-import { SERVICE_ID, PROJECT_ID, ENVIRONMENT_ID } from "./constants";
+import DeploymentCardSkeleton from "@/components/deployment-card-skeleton";
+import { Skeleton } from "@/components/primitives/skeleton";
+import { SERVICE_ID, PROJECT_ID, ENVIRONMENT_ID } from "@/constants";
 
 function App() {
   const [showHistory, setShowHistory] = useState(true);

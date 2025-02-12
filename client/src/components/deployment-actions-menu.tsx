@@ -1,14 +1,14 @@
 import { DeploymentStatus } from "@/types";
 import { Deployment } from "@/types";
-import { DropdownMenuTrigger } from "./primitives/dropdown-menu";
 import {
+  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from "./primitives/dropdown-menu";
-import { DropdownMenu } from "./primitives/dropdown-menu";
-import { Button } from "./primitives/button";
+} from "@/components/primitives/dropdown-menu";
+import { DropdownMenu } from "@/components/primitives/dropdown-menu";
+import { Button } from "@/components/primitives/button";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useServiceDeploy } from "@/hooks/useServiceDeploy";

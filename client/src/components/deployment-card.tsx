@@ -1,10 +1,10 @@
-import { Badge } from "./primitives/badge";
-import { Card } from "./primitives/card";
-import { cn } from "../lib/utils";
+import { Badge } from "@/components/primitives/badge";
+import { Card } from "@/components/primitives/card";
+import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { Deployment, DeploymentStatus } from "@/types";
-import DeploymentActionsMenu from "./deployment-actions-menu";
-import DeploymentEvents from "./deployment-events";
+import DeploymentActionsMenu from "@/components/deployment-actions-menu";
+import DeploymentEvents from "@/components/deployment-events";
 
 function DeploymentCard({
   deployment,

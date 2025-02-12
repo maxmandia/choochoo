@@ -1,9 +1,9 @@
 import { Deployment } from "@/types";
 import { useGetDeploymentEvents } from "@/hooks/useGetDeploymentEvents";
 import { DeploymentStatus, DeploymentEventStep } from "@/types";
-import { Card } from "./primitives/card";
+import { Card } from "@/components/primitives/card";
 import { cn } from "@/lib/utils";
-import DeploymentEventsSkeleton from "./deployment-events-skeleton";
+import DeploymentEventsSkeleton from "@/components/deployment-events-skeleton";
 
 function DeploymentEvents({ deployment }: { deployment: Deployment }) {
   const {
