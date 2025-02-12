@@ -16,13 +16,14 @@ import { useStopDeployment } from "@/hooks/useStopDeployement";
 import { useDeploymentRedeploy } from "@/hooks/useDeploymentRedeploy";
 import { useWebSocket } from "@/context/web-socket-context";
 import { toast } from "sonner";
+import { ENVIRONMENT_ID, SERVICE_ID } from "@/constants";
 
 function DeploymentActionsMenu({ deployment }: { deployment: Deployment }) {
   const { subscribeToDeploymentEvents, subscribeToDeployment } = useWebSocket();
   const { mutateAsync: stopDeployment } = useStopDeployment();
   const { mutateAsync: deployService } = useServiceDeploy(
-    "96fbbfd7-6939-4fc5-9022-954774f26bd9",
-    "39cd327c-525b-414e-957c-3959a17486a2"
+    ENVIRONMENT_ID,
+    SERVICE_ID
   );
   const { mutateAsync: redeployDeployment } = useDeploymentRedeploy();
 

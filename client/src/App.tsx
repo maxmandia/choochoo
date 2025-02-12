@@ -10,23 +10,18 @@ import { Separator } from "./components/primitives/separator";
 import { Deployment } from "@/types";
 import DeploymentCardSkeleton from "./components/deployment-card-skeleton";
 import { Skeleton } from "./components/primitives/skeleton";
+import { SERVICE_ID, PROJECT_ID, ENVIRONMENT_ID } from "./constants";
 
 function App() {
   const [showHistory, setShowHistory] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const { data, isLoading: isServiceLoading } = useGetService(
-    "39cd327c-525b-414e-957c-3959a17486a2"
-  );
+  const { data, isLoading: isServiceLoading } = useGetService(SERVICE_ID);
   const {
     data: deployments,
     fetchNextPage,
     hasNextPage,
     isLoading: isDeploymentsLoading,
-  } = useGetDeployments(
-    "39cd327c-525b-414e-957c-3959a17486a2",
-    "5601a4f4-da8e-4978-9e2f-ac476d3cb851",
-    "96fbbfd7-6939-4fc5-9022-954774f26bd9"
-  );
+  } = useGetDeployments(SERVICE_ID, PROJECT_ID, ENVIRONMENT_ID);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
