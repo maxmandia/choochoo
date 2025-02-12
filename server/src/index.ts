@@ -9,7 +9,7 @@ import http from "http";
 
 dotenv.config();
 
-const app = express();
+export const app = express();
 const port = process.env.PORT || 9000;
 
 const server = http.createServer(app);
