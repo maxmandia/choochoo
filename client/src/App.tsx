@@ -82,6 +82,7 @@ function App() {
           {isDeploymentsLoading ? (
             <DeploymentCardSkeleton />
           ) : (
+            deployments?.activeDeployments &&
             deployments?.activeDeployments.length > 0 && (
               <>
                 {deployments.activeDeployments.map(
