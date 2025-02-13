@@ -30,7 +30,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const wsInstance = new WebSocket(
-      "ws://server-production-9c05.up.railway.app"
+      "wss://server-production-9c05.up.railway.app"
     );
     wsRef.current = wsInstance;
 
