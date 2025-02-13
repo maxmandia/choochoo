@@ -11,6 +11,7 @@ import {
   DeploymentsQueryData,
   DeploymentStatus,
 } from "../types";
+
 interface IWebSocketContext {
   ws: WebSocket | null;
   subscribeToDeployment: (deploymentId: string) => void;
@@ -28,7 +29,9 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const wsInstance = new WebSocket("ws://localhost:9000");
+    const wsInstance = new WebSocket(
+      "ws://server-production-9c05.up.railway.app"
+    );
     wsRef.current = wsInstance;
 
     wsInstance.onmessage = async (event) => {
